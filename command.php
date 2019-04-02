@@ -23,9 +23,9 @@ class Present_Command extends WP_CLI_Command {
 
 		list( $file ) = $args;
 
-		$this->height = (int)shell_exec( 'tput lines' );
-		$this->width = (int)shell_exec( 'tput cols' );
-		$this->slide_height = $this->height - 1; // accommodates navigation tools
+		$this->height       = (int) shell_exec( 'tput lines' );
+		$this->width        = (int) shell_exec( 'tput cols' );
+		$this->slide_height = $this->height - 1; // accommodates navigation tools.
 
 		if ( ! file_exists( $file ) )
 			WP_CLI::error( "File to present doesn't exist." );
@@ -35,7 +35,7 @@ class Present_Command extends WP_CLI_Command {
 		$slides = $this->get_slides( $presentation );
 
 		$i = 0;
-		while( $i < count( $slides ) ) {
+		while ( $i < count( $slides ) ) {
 
 			if ( $i < 0 )
 				exit;
@@ -60,7 +60,7 @@ class Present_Command extends WP_CLI_Command {
 				case 'k':
 					$i--;
 					break;
-				case 'q';
+				case 'q':
 					exit;
 			}
 		}
@@ -70,7 +70,7 @@ class Present_Command extends WP_CLI_Command {
 	 * Get the slides from a given presentation
 	 */
 	private function get_slides( $presentation ) {
-		// Slides are denoted by 3 or more "*" characters
+		// Slides are denoted by 3 or more "*" characters.
 		return preg_split( '/[*]{3,}/s', $presentation );
 	}
 
@@ -79,32 +79,32 @@ class Present_Command extends WP_CLI_Command {
 	 */
 	private function display_slide( $slide ) {
 		$built_slide_lines = array();
-		$dont_pad = 0;
+		$dont_pad          = 0;
 
-		// Remove accidental extra lines
+		// Remove accidental extra lines.
 		$slide = rtrim( $slide, PHP_EOL );
 
-		// Remove Markdown formatting hacks
+		// Remove Markdown formatting hacks.
 		$slide = preg_replace( "#(\<!--\sMarkdown\sformatting\shack\s--\>\r?\n\r?\n)#", '', $slide );
 
-		// Strip links
+		// Strip links.
 		$slide = preg_replace( "#\[([^\]]+)\]\(([^\)]+)\)#", '$1', $slide );
 
-		// Title or subtitle slides are centered horizontally and verically
+		// Title or subtitle slides are centered horizontally and verically.
 		if ( preg_match( "#(.+)?\r?\n([=\-]{1,})\r?\n?(.+)?#s", $slide, $matches ) ) {
 
-			// Title slide is normal
+			// Title slide is normal.
 			if ( '=' === $matches[2][0] ) {
 				$background_color = '%n';
-			// subtitle slides are blue background
-			} else if ( '-' === $matches[2][0] ) {
+			// subtitle slides are blue background.
+			} elseif ( '-' === $matches[2][0] ) {
 				$background_color = '%4';
 			}
 
 			$built_slide_lines[] = $background_color;
 
 			$center_pieces = array();
-			// Header
+			// Header.
 			$header = strtoupper( trim( $matches[1] ) );
 			if ( '=' === $matches[2][0] ) {
 				$center_pieces[] = $background_color . '%1' . $header . '%0';
@@ -114,8 +114,8 @@ class Present_Command extends WP_CLI_Command {
 
 			if ( ! empty( $matches[3] ) ) {
 				$extra_pieces = explode( PHP_EOL, $matches[3] );
-				foreach( $extra_pieces as $extra_piece ) {
-						// Code blocks
+				foreach ( $extra_pieces as $extra_piece ) {
+						// Code blocks.
 					if ( false !== strpos( $extra_piece, '`' ) ) {
 						$extra_piece = preg_replace( '/[\`]([^\`]+)[\`]/', '%g$1%n', $extra_piece );
 					}
@@ -124,51 +124,57 @@ class Present_Command extends WP_CLI_Command {
 			}
 
 			if ( count( $center_pieces ) < $this->height ) {
-				$total_diff = $this->height - count( $center_pieces );
+				$total_diff        = $this->height - count( $center_pieces );
 				$built_slide_lines = array_pad( $built_slide_lines, floor( $total_diff / 2 ), '' );
 			}
 
-			// Horizontally center the center pieces
-			foreach( $center_pieces as $center_piece ) {
-				$center_width = cli\safe_strlen( $center_piece );
+			// Horizontally center the center pieces.
+			foreach ( $center_pieces as $center_piece ) {
+				$center_width        = cli\safe_strlen( $center_piece );
 				$built_slide_lines[] = $background_color . str_pad( $center_piece, $this->width, ' ', STR_PAD_BOTH );
 			}
 
-			// Pad the rest of the slide
+			// Pad the rest of the slide.
 			if ( count( $built_slide_lines ) < ( $this->height - 1 ) ) {
 				$built_slide_lines = array_pad( $built_slide_lines, $this->height - 1, $background_color );
 			}
 
 			$built_slide_lines[] = '%0';
 
-			$built_slide_str = implode( PHP_EOL, $built_slide_lines );
-			$built_slide_str = WP_CLI::colorize( $built_slide_str );
+			$built_slide_str   = implode( PHP_EOL, $built_slide_lines );
+			$built_slide_str   = WP_CLI::colorize( $built_slide_str );
 			$built_slide_lines = explode( PHP_EOL, $built_slide_str );
 
 		} else {
-			$slide_lines = explode( PHP_EOL, $slide );
+			$slide_lines      = explode( PHP_EOL, $slide );
 			$background_color = '';
 
 			$current_colorize = '%n';
-			foreach( $slide_lines as $slide_line ) {
+			foreach ( $slide_lines as $slide_line ) {
 
-				// Start / end code blocks
+				// Start / end code blocks.
 				if ( 0 === stripos( $slide_line, '    ' ) ) {
-					$slide_line = '%g' . preg_replace( '/^[\s]{4}/', '', $slide_line  ). '%n';
+					$slide_line = '%8' . preg_replace( '/^[\s]{4}/', '', $slide_line ) . '%n';
 				}
 
-				// Start / end code quotes
+				// Start / end code quotes.
 				if ( 0 === stripos( $slide_line, '> ' ) ) {
-					$slide_line = '"' . preg_replace( '/^\>\s/', '', $slide_line  ). '"';
+					$slide_line = '"' . preg_replace( '/^\>\s/', '', $slide_line ) . '"';
 				}
 
-				// Headers
-				if ( false !== ( stripos( $slide_line, '###' ) ) ) {
-					$slide_line = str_replace( '###', '%9', $slide_line );
+				// Headers 5.
+				if ( false !== ( stripos( $slide_line, '#####' ) ) ) {
+					$slide_line  = str_replace( '##### ', '%Y', $slide_line );
 					$slide_line .= '%n';
 				}
 
-				// Code blocks
+				// Headers 3.
+				if ( false !== ( stripos( $slide_line, '###' ) ) ) {
+					$slide_line  = str_replace( '###', '%4	(', $slide_line );
+					$slide_line .= ' )%n';
+				}
+
+				// Code blocks.
 				if ( false !== strpos( $slide_line, '`' ) ) {
 					$slide_line = preg_replace( '/[\`]([^\`]+)[\`]/', '%g$1%n', $slide_line );
 				}
@@ -184,14 +190,13 @@ class Present_Command extends WP_CLI_Command {
 
 				$built_slide_lines[] = $slide_line;
 			}
-
 		}
 
 		if ( ( count( $built_slide_lines ) + $dont_pad ) < ( $this->slide_height ) ) {
 			$built_slide_lines = array_pad( $built_slide_lines, $this->slide_height - $dont_pad, $background_color );
 		}
 
-		foreach( $built_slide_lines as $built_slide_line ) {
+		foreach ( $built_slide_lines as $built_slide_line ) {
 			WP_CLI::line( $built_slide_line );
 		}
 	}
