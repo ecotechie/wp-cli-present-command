@@ -40,10 +40,10 @@ class Present_Command extends WP_CLI_Command {
 			if ( $i < 0 )
 				exit;
 
-			$this->display_slide( $slides[$i] );
+			$this->display_slide( $slides[ $i ] );
 
 			$slide_count = $i + 1;
-			WP_CLI::out( sprintf( "%d/%d ", $slide_count, count( $slides ) ) );
+			WP_CLI::out( sprintf( " %d/%d ", $slide_count, count( $slides ) ) );
 
 			$ret = $this->prompt( "(#/<ret>/j/k/q)" );
 			switch ( $ret ) {
@@ -107,7 +107,7 @@ class Present_Command extends WP_CLI_Command {
 			// Header.
 			$header = strtoupper( trim( $matches[1] ) );
 			if ( '=' === $matches[2][0] ) {
-				$center_pieces[] = $background_color . '%1' . $header . '%0';
+				$center_pieces[] = $background_color . '%6' . $header . '%0';
 			} else {
 				$center_pieces[] = $background_color . $header;
 			}
@@ -154,17 +154,17 @@ class Present_Command extends WP_CLI_Command {
 
 				// Start / end code blocks.
 				if ( 0 === stripos( $slide_line, '    ' ) ) {
-					$slide_line = '%8' . preg_replace( '/^[\s]{4}/', '', $slide_line ) . '%n';
+					$slide_line = ' %8' . preg_replace( '/^[\s]{4}/', '', $slide_line ) . '%n';
 				}
 
 				// Start / end code quotes.
 				if ( 0 === stripos( $slide_line, '> ' ) ) {
-					$slide_line = '"' . preg_replace( '/^\>\s/', '', $slide_line ) . '"';
+					$slide_line = ' "' . preg_replace( '/^\>\s/', '', $slide_line ) . '"';
 				}
 
 				// Headers 5.
 				if ( false !== ( stripos( $slide_line, '#####' ) ) ) {
-					$slide_line  = str_replace( '##### ', '%Y', $slide_line );
+					$slide_line  = ' ' . str_replace( '##### ', '%Y', $slide_line );
 					$slide_line .= '%n';
 				}
 
